@@ -6,7 +6,7 @@
     "type": "Proprietor",
     "image": "/public/student/student.svg"
   },
-  "hidden": true,
+  "status": "hidden",
   "credentials": ["business-digital-card"],
   "revocationInfo": [
     {
