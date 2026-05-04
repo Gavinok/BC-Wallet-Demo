@@ -18,6 +18,7 @@ import { basePath } from '../../utils/BasePath'
 import { isConnected } from '../../utils/Helpers'
 import { addIntroductionProgress, removeIntroductionProgress } from '../../utils/IntroductionUtils'
 import { prependApiUrl } from '../../utils/Url'
+import log from '../../utils/logger'
 
 import { CharacterContent } from './components/CharacterContent'
 import { IntroductionBottomNav } from './components/IntroductionBottomNav'
@@ -43,7 +44,7 @@ const resolveCredentials = (ids: string[] | undefined, showcase: Showcase | unde
   return ids
     .map((id) => {
       const cred = showcase.credentials.find((c) => c.id === id)
-      if (!cred) console.warn(`Credential ID "${id}" not found in showcase "${showcase.name}"`)
+      if (!cred) log.warn(`Credential ID "${id}" not found in showcase "${showcase.name}"`)
       return cred
     })
     .filter(Boolean) as Credential[]

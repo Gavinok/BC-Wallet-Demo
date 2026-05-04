@@ -16,6 +16,7 @@ import { useAppDispatch } from '../../../hooks/hooks'
 import { useConnection } from '../../../slices/connection/connectionSelectors'
 import { createProof, deleteProofById, createDeepProof, fetchProofById } from '../../../slices/proof/proofThunks'
 import { useSocket } from '../../../slices/socket/socketSelector'
+import log from '../../../utils/logger'
 import { FailedRequestModal } from '../../introduction/components/FailedRequestModal'
 import { ProofAttributesCard } from '../components/ProofAttributesCard'
 import { StepInfo } from '../components/StepInfo'
@@ -48,7 +49,7 @@ const resolveMarker = (val: string | number | undefined): number | undefined => 
     d.setFullYear(d.getFullYear() + parseInt(m[1]))
     return parseInt(d.toISOString().split('T')[0].replace(/-/g, ''))
   }
-  console.warn(`resolveMarker: unrecognised marker "${val}", proof request may be malformed`)
+  log.warn(`resolveMarker: unrecognised marker "${val}", proof request may be malformed`)
   return undefined
 }
 
@@ -58,7 +59,9 @@ const resolveNonRevoked = (
   if (!nr) return undefined
   const to = resolveMarker(nr.to)
   if (to === undefined) {
-    console.warn(`resolveNonRevoked: "to" field resolved to undefined (value: ${JSON.stringify(nr.to)}), skipping nonRevoked`)
+    log.warn(
+      `resolveNonRevoked: "to" field resolved to undefined (value: ${JSON.stringify(nr.to)}), skipping nonRevoked`,
+    )
     return undefined
   }
   return { to, from: resolveMarker(nr.from) }

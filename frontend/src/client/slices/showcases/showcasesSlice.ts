@@ -4,6 +4,7 @@ import type { PayloadAction } from '@reduxjs/toolkit'
 import { createSlice } from '@reduxjs/toolkit'
 
 import { getOrCreateCredDefId } from '../../api/CredentialApi'
+import log from '../../utils/logger'
 
 import { fetchAllShowcases, fetchShowcaseById } from './showcasesThunks'
 
@@ -33,7 +34,9 @@ const showcaseSlice = createSlice({
       state.isUploading = true
       action.payload.showcase.credentials.forEach((cred) => {
         if (typeof cred === 'string') {
-          console.warn(`uploadShowcase: credential "${cred}" is a string ID, not a hydrated Credential object. Skipping getOrCreateCredDefId.`)
+          log.warn(
+            `uploadShowcase: credential "${cred}" is a string ID, not a hydrated Credential object. Skipping getOrCreateCredDefId.`,
+          )
           return
         }
         promises.push(getOrCreateCredDefId(cred))
