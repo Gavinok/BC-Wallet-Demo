@@ -1,7 +1,7 @@
 describe('Onboarding Page', () => {
   const BASE_ROUTE = '/digital-trust/showcase'
   beforeEach(() => {
-    cy.intercept('GET', '**/demo/characters', { fixture: 'characters.json' }).as('getCharacters')
+    cy.intercept('GET', '**/demo/showcases', { fixture: 'showcases.json' }).as('getCharacters')
     cy.intercept('GET', '**/demo/wallets', { body: [] }).as('getWallets')
     cy.visit(`${BASE_ROUTE}/demo`)
     cy.wait('@getCharacters')

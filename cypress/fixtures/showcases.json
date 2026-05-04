@@ -1,8 +1,12 @@
 [
   {
     "name": "Alice",
-    "type": "Student",
-    "image": "/public/student/student.svg",
+    "persona": {
+      "name": "Alice",
+      "type": "Student",
+      "image": "/public/student/student.svg"
+    },
+    "credentials": [],
     "progressBar": [
       {
         "name": "person",
@@ -35,32 +39,32 @@
         "iconDark": "/public/common/icon-balloon-dark.svg"
       }
     ],
-    "onboarding": [
-      { "screenId": "PICK_CHARACTER", "title": "Meet Alice", "text": "Alice is a student at BestBC College." },
+    "introduction": [
+      { "screenId": "PICK_CHARACTER", "name": "Meet Alice", "text": "Alice is a student at BestBC College." },
       {
         "screenId": "SETUP_START",
-        "title": "Let's get started!",
+        "name": "Let's get started!",
         "text": "BC Wallet is a new app for storing credentials."
       },
       {
         "screenId": "CHOOSE_WALLET",
-        "title": "Install BC Wallet",
+        "name": "Install BC Wallet",
         "text": "Install the BC Wallet app onto your smartphone."
       },
       {
         "screenId": "CONNECT",
-        "title": "Connect with BestBC College",
+        "name": "Connect with BestBC College",
         "text": "Scan the QR code.",
         "issuer_name": "BestBC College"
       },
       {
         "screenId": "ACCEPT_CREDENTIAL",
-        "title": "Accept your student card",
+        "name": "Accept your student card",
         "text": "Review the offer in BC Wallet.",
         "credentials": []
       },
-      { "screenId": "SETUP_COMPLETED", "title": "You're all set!", "text": "Well done." }
+      { "screenId": "SETUP_COMPLETED", "name": "You're all set!", "text": "Well done." }
     ],
-    "useCases": []
+    "scenarios": []
   }
 ]
