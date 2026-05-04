@@ -1,6 +1,7 @@
 [
   {
     "name": "Alice",
+    "status": "active",
     "persona": {
       "name": "Alice",
       "type": "Student",

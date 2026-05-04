@@ -34,7 +34,7 @@ describe('ShowcaseModel', () => {
     expect(json.persona.name).toBe('Alice')
     expect(json.persona.type).toBe('Student')
     expect(json.persona.image).toBe('/public/student/student.svg')
-    expect(json.hidden).toBe(false)
+    expect(json.status).toBe('active')
   })
 
   it('rejects a showcase with a missing required field', async () => {

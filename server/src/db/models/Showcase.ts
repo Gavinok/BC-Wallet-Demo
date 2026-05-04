@@ -1,4 +1,11 @@
-import type { IntroductionStep, Persona, ProgressBarStep, RevocationInfoItem, Showcase } from '../../content/types'
+import type {
+  IntroductionStep,
+  Persona,
+  ProgressBarStep,
+  RevocationInfoItem,
+  Showcase,
+  ShowcaseStatus,
+} from '../../content/types'
 import type { Types } from 'mongoose'
 
 import { Schema, model } from 'mongoose'
@@ -61,7 +68,7 @@ const ShowcaseSchema = new Schema<Showcase>(
   {
     name: { type: String, required: true },
     persona: { type: PersonaSchema, required: true },
-    hidden: { type: Boolean, default: false },
+    status: { type: String, enum: ['active', 'hidden', 'pending'] satisfies ShowcaseStatus[], default: 'active' },
     description: String,
     credentials: { type: [String], required: true, default: [] },
     // required + default to match types.ts where both fields are non-optional.

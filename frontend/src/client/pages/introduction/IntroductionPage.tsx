@@ -36,7 +36,7 @@ export const IntroductionPage: React.FC = () => {
   const [mounted, setMounted] = useState(false)
 
   const allShowcases = useMemo(() => {
-    const all = [...showcases].filter((showcase) => !showcase.hidden || showHiddenScenarios)
+    const all = [...showcases].filter((showcase) => showcase.status === 'active' || showHiddenScenarios)
 
     if (uploadedShowcase) {
       all.push(uploadedShowcase)
