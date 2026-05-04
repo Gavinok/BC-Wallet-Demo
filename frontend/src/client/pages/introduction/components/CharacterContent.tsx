@@ -16,7 +16,7 @@ export const CharacterContent: React.FC<Props> = ({ showcase }) => {
       {showcase ? (
         <AnimatePresence mode="wait">
           <motion.div
-            key={showcase.persona.type}
+            key={showcase.persona?.type}
             variants={characterFade}
             initial="hidden"
             animate="show"
@@ -24,9 +24,13 @@ export const CharacterContent: React.FC<Props> = ({ showcase }) => {
             className="flex flex-col h-full justify-around"
           >
             <div className="p-2 bg-bcgov-blue dark:bg-bcgov-gold text-white rounded-l-lg flex px-4 self-end">
-              <p>{showcase.persona.type}</p>
+              <p>{showcase.persona?.type}</p>
             </div>
-            <img className="h-72" src={prependApiUrl(showcase.persona.image)} alt={showcase.persona.name} />
+            <img
+              className="h-72"
+              src={prependApiUrl(showcase.persona?.image || '')}
+              alt={showcase.persona?.name || ''}
+            />
           </motion.div>
         </AnimatePresence>
       ) : (

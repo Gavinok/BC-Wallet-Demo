@@ -75,7 +75,7 @@ export function ScreenContentCard({
           <div className="flex flex-wrap gap-2 mt-2">
             <div className="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-medium">
               <CheckBadgeIcon className="w-3 h-3" />
-              {requestOptions.title || `Request (${requestOptions.requestedCredentials.length} credentials)`}
+              {requestOptions.name || `Request (${requestOptions.requestedCredentials.length} credentials)`}
             </div>
           </div>
         )}

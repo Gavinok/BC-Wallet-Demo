@@ -276,8 +276,8 @@ export function CreateOrEditScreenModal({
                       <label className="block text-xs font-semibold text-bcgov-black mb-1">Title</label>
                       <input
                         type="text"
-                        value={requestOptions.title}
-                        onChange={(e) => setRequestOptions({ ...requestOptions, title: e.target.value })}
+                        value={requestOptions.name}
+                        onChange={(e) => setRequestOptions({ ...requestOptions, name: e.target.value })}
                         placeholder="Presentation title"
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bcgov-blue"
                       />
@@ -316,7 +316,7 @@ export function CreateOrEditScreenModal({
                 ) : (
                   <button
                     onClick={() => {
-                      setRequestOptions({ title: '', text: '', requestedCredentials: [] })
+                      setRequestOptions({ name: '', text: '', requestedCredentials: [] })
                       setShowRequestOptions(true)
                     }}
                     className="w-1/2 mx-auto block px-4 py-2 bg-bcgov-blue text-white font-medium rounded-lg hover:bg-bcgov-blue-dark transition-colors text-sm"

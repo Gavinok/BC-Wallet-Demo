@@ -76,7 +76,7 @@ export const UseCaseItem: React.FC<Props> = ({
                       schema: 'iglu:ca.bc.gov.digital/action/jsonschema/1-0-0',
                       data: {
                         action: 'start',
-                        path: `${currentShowcase?.persona.type.toLowerCase()}_${slug}`,
+                        path: `${currentShowcase?.persona?.type?.toLowerCase()}_${slug}`,
                         step: 'usecase_start',
                       },
                     },

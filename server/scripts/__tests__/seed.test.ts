@@ -53,27 +53,27 @@ describe('runSeed', () => {
     await runSeed()
 
     await ShowcaseModel.findOneAndUpdate(
-      { 'persona.type': showcases[0].persona.type },
+      { 'persona.type': showcases[0].persona?.type },
       { $set: { name: 'Modified Name' } },
     )
 
     await runSeed()
 
-    const doc = await ShowcaseModel.findOne({ 'persona.type': showcases[0].persona.type })
+    const doc = await ShowcaseModel.findOne({ 'persona.type': showcases[0].persona?.type })
     expect(doc?.name).toBe(showcases[0].name)
   })
 
   it('each showcase has the expected persona type', async () => {
     const { runSeed } = await import('../seed')
     await runSeed()
-    const types = (await ShowcaseModel.find().select('persona.type')).map((d) => d.persona.type)
-    expect(types).toEqual(expect.arrayContaining(showcases.map((s) => s.persona.type)))
+    const types = (await ShowcaseModel.find().select('persona.type')).map((d) => d.persona?.type)
+    expect(types).toEqual(expect.arrayContaining(showcases.map((s) => s.persona?.type)))
   })
 
   it('showcase credentials field contains ID strings not objects', async () => {
     const { runSeed } = await import('../seed')
     await runSeed()
-    const doc = await ShowcaseModel.findOne({ 'persona.type': showcases[0].persona.type }).lean()
+    const doc = await ShowcaseModel.findOne({ 'persona.type': showcases[0].persona?.type }).lean()
     expect(doc?.credentials.every((c) => typeof c === 'string')).toBe(true)
   })
 })
