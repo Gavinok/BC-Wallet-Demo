@@ -15,7 +15,31 @@ export class AdminCredentialController {
   public async createCredential(@Body() body: Credential) {
     logger.debug({ body }, 'Creating new credential')
     try {
-      const credential = new CredentialModel(body)
+      // Generate _id from credential name and version to allow multiple versions of same credential
+      // e.g., "Digital Student Card" v1.0.0 -> "digital-student-card-1-0-0"
+      const nameSlug = body.name
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+      const versionSlug = body.version
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]/g, '')
+      const credentialId = `${nameSlug}-${versionSlug}`
+
+      // Check if credential with this ID already exists
+      const existing = await CredentialModel.findById(credentialId)
+      if (existing) {
+        logger.warn({ credentialId }, 'Credential with this ID already exists')
+        throw new Error(`Credential "${body.name}" version "${body.version}" already exists`)
+      }
+
+      const credential = new CredentialModel({
+        _id: credentialId,
+        ...body,
+      })
       const saved = await credential.save()
       logger.debug({ credentialId: saved._id }, 'Credential created successfully')
       const obj = saved.toObject() as any

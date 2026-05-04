@@ -26,7 +26,7 @@ export function CredentialsTab({
   const auth = useAuth()
   const navigate = useNavigate()
 
-  const initializeBaseOnboarding = async () => {
+  const initializeBaseIntroduction = async () => {
     if (!isNewShowcase || !showcase || showcase.introduction?.length || !auth.user?.access_token) {
       return
     }
@@ -116,19 +116,26 @@ export function CredentialsTab({
     })
 
     try {
-      await updateShowcase(auth, showcase.name, {
+      const updates: any = {
         introduction: introductionScreens,
         progressBar: progressBar,
-      })
+      }
+
+      // Ensure selectedCredential is in root credentials array if present
+      if (selectedCredential && !showcase.credentials?.some((c) => c?.id === selectedCredential.id)) {
+        updates.credentials = [...(showcase.credentials?.filter((c) => c != null) || []), selectedCredential]
+      }
+
+      await updateShowcase(auth, showcase.name, updates)
       onRefresh?.()
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Failed to initialize onboarding:', error)
+      console.error('Failed to initialize introduction:', error)
     }
   }
 
   const handleNextStep = async () => {
-    await initializeBaseOnboarding()
+    await initializeBaseIntroduction()
     onTabChange?.('introduction')
   }
 
@@ -159,13 +166,15 @@ export function CredentialsTab({
   }
 
   useEffect(() => {
-    if (selectedCredential) {
+    // In new showcase flow with onboarding initialization, skip separate add
+    // since initializeBaseOnboarding will handle adding the credential
+    if (selectedCredential && !(isNewShowcase && !showcase?.introduction?.length)) {
       addCredentialToShowcase(selectedCredential)
     }
     if (selectedCredential && !showcase?.introduction?.length) {
-      initializeBaseOnboarding()
+      initializeBaseIntroduction()
     }
-  }, [selectedCredential, showcase?.introduction?.length])
+  }, [selectedCredential, showcase?.introduction?.length, isNewShowcase])
 
   return (
     <div className="flex-1 overflow-auto flex flex-col items-center justify-start py-8">

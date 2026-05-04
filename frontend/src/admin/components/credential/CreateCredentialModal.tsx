@@ -1,7 +1,8 @@
 import { ArrowUpTrayIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
+import { useAuth } from 'react-oidc-context'
 
-import { publicBaseUrl } from '../../api/adminApi'
+import { createCredential, publicBaseUrl } from '../../api/adminApi'
 import { ImageUploadModal } from '../ImageUploadModal'
 
 interface Attribute {
@@ -12,9 +13,11 @@ interface Attribute {
 interface CreateCredentialModalProps {
   isOpen: boolean
   onClose: () => void
+  onCredentialCreated?: () => void
 }
 
-export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModalProps) {
+export function CreateCredentialModal({ isOpen, onClose, onCredentialCreated }: CreateCredentialModalProps) {
+  const auth = useAuth()
   const [name, setName] = useState('')
   const [version, setVersion] = useState('')
   const [image, setImage] = useState('')
@@ -22,6 +25,8 @@ export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModal
   const [attributes, setAttributes] = useState<Attribute[]>([])
   const [attributeKey, setAttributeKey] = useState('')
   const [attributeValue, setAttributeValue] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleAddAttribute = () => {
     if (attributeKey.trim() && attributeValue.trim()) {
@@ -35,10 +40,6 @@ export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModal
     setAttributes(attributes.filter((_, i) => i !== index))
   }
 
-  const handleCreate = () => {
-    // Create functionality will be implemented later
-  }
-
   const handleClose = () => {
     // Reset form
     setName('')
@@ -47,7 +48,46 @@ export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModal
     setAttributes([])
     setAttributeKey('')
     setAttributeValue('')
+    setError('')
     onClose()
+  }
+
+  const handleCreate = async () => {
+    if (!name.trim() || !version.trim()) {
+      setError('Name and version are required')
+      return
+    }
+
+    if (!auth.user?.access_token) {
+      setError('Not authenticated')
+      return
+    }
+
+    setIsLoading(true)
+    setError('')
+
+    try {
+      await createCredential(auth, {
+        name,
+        version,
+        icon: image || '',
+        attributes,
+      })
+      // Reset form and notify parent to refresh
+      setName('')
+      setVersion('')
+      setImage('')
+      setAttributes([])
+      setAttributeKey('')
+      setAttributeValue('')
+      setError('')
+      onClose()
+      onCredentialCreated?.()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create credential')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   if (!isOpen) return null
@@ -61,6 +101,12 @@ export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModal
             <XMarkIcon className="w-6 h-6" />
           </button>
         </div>
+
+        {error && (
+          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-red-800 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* Form Content */}
         <div className="space-y-6">
@@ -185,15 +231,17 @@ export function CreateCredentialModal({ isOpen, onClose }: CreateCredentialModal
         <div className="mt-8 flex justify-end gap-4">
           <button
             onClick={handleClose}
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+            disabled={isLoading}
+            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Cancel
           </button>
           <button
             onClick={handleCreate}
-            className="px-4 py-2 text-white bg-bcgov-blue hover:bg-blue-700 rounded-lg font-medium transition-colors"
+            disabled={isLoading || !name.trim() || !version.trim()}
+            className="px-4 py-2 text-white bg-bcgov-blue hover:bg-blue-700 rounded-lg font-medium transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Create
+            {isLoading ? 'Creating...' : 'Create'}
           </button>
         </div>
       </div>

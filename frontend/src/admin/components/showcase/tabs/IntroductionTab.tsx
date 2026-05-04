@@ -102,13 +102,13 @@ export function IntroductionTab({ showcase, isNewShowcase, onTabChange, onRefres
   const handleDrop = async (dropIdx: number) => {
     if (draggedIdx === null || !showcase.introduction) return
 
-    const newOnboarding = [...(reorderedIntroduction || showcase.introduction)]
-    const [draggedItem] = newOnboarding.splice(draggedIdx, 1)
-    newOnboarding.splice(dropIdx, 0, draggedItem)
+    const newIntroduction = [...(reorderedIntroduction || showcase.introduction)]
+    const [draggedItem] = newIntroduction.splice(draggedIdx, 1)
+    newIntroduction.splice(dropIdx, 0, draggedItem)
 
     try {
-      // Call API to persist reordered onboarding
-      await updateShowcase(auth, showcase.name, { introduction: newOnboarding })
+      // Call API to persist reordered introduction
+      await updateShowcase(auth, showcase.name, { introduction: newIntroduction })
 
       // Refresh component with backend results
       await onRefresh?.()
@@ -117,7 +117,7 @@ export function IntroductionTab({ showcase, isNewShowcase, onTabChange, onRefres
       setReorderedIntroduction(null)
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error('Error reordering onboarding screens:', error)
+      console.error('Error reordering introduction screens:', error)
     }
 
     setDraggedIdx(null)
@@ -207,7 +207,7 @@ export function IntroductionTab({ showcase, isNewShowcase, onTabChange, onRefres
         progressBarStep={editingProgressBar}
         showcase={showcase}
         isCreate={editingScreenIdx === -1}
-        screenType="onboarding"
+        screenType="introduction"
         onSave={handleSaveScreen}
       />
       <IntroductionInitializedModal

@@ -16,7 +16,7 @@ interface CreateOrEditScreenModalProps {
   progressBarStep: ProgressBarStep | null
   showcase: Showcase | null
   isCreate?: boolean
-  screenType?: 'onboarding' | 'scenarios'
+  screenType?: 'introduction' | 'scenarios'
   onSave: (updatedScreen: IntroductionStep, updatedProgressBar?: ProgressBarStep) => void
 }
 
@@ -27,7 +27,7 @@ export function CreateOrEditScreenModal({
   progressBarStep,
   showcase,
   isCreate = false,
-  screenType = 'onboarding',
+  screenType = 'introduction',
   onSave,
 }: CreateOrEditScreenModalProps) {
   const [screenId, setScreenId] = useState('')
@@ -196,7 +196,7 @@ export function CreateOrEditScreenModal({
             </div>
           </div>
 
-          {screenType === 'onboarding' && (
+          {screenType === 'introduction' && (
             <div>
               <label className="block text-sm font-semibold text-bcgov-black mb-4">Credentials</label>
               <p className="text-sm text-gray-500 italic">Credentials will appear as a QR code.</p>

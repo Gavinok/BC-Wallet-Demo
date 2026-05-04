@@ -115,6 +115,26 @@ export const getAllCredentials = async (auth: AuthContextProps): Promise<Credent
   return data
 }
 
+export const createCredential = async (
+  auth: AuthContextProps,
+  credential: Omit<Credential, 'id'>,
+): Promise<Credential> => {
+  const res = await fetch(`${adminBaseUrl}/credentials`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${auth.user?.access_token ?? ''}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(credential),
+  })
+  if (!res.ok) {
+    const errorData = (await res.json()) as { error?: string }
+    throw new Error(errorData.error || `Request failed: ${res.status}`)
+  }
+  const data = (await res.json()) as Credential
+  return data
+}
+
 // ============================================================================
 // IMAGE ENDPOINTS
 // ============================================================================

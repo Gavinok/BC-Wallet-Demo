@@ -86,7 +86,7 @@ export function CredentialsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {credentials.map((credential) => (
                   <button
-                    key={credential.name}
+                    key={credential.id}
                     type="button"
                     onClick={() => {
                       if (location.state?.fromShowcase && location.state?.showcaseName) {
@@ -110,7 +110,14 @@ export function CredentialsPage() {
         </div>
       </div>
 
-      <CreateCredentialModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
+      <CreateCredentialModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onCredentialCreated={() => {
+          setIsCreateModalOpen(false)
+          fetchCredentials()
+        }}
+      />
     </div>
   )
 }
