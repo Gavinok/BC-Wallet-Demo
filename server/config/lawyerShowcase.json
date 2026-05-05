@@ -5,7 +5,7 @@
     "type": "Lawyer",
     "image": "/public/lawyer2/lawyer2.svg"
   },
-  "description": "Joyce is a member of the Law Society of British Columbia looking to access court materials online.",
+  "description": "A demonstration of how lawyers can use digital credentials to prove their professional status and identity.",
   "credentials": ["lawyer-member-card", "lawyer-person"],
   "revocationInfo": [
     {
