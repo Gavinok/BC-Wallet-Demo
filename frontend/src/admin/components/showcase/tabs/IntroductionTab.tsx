@@ -6,7 +6,7 @@ import { useAuth } from 'react-oidc-context'
 
 import { publicBaseUrl, updateShowcase } from '../../../api/adminApi'
 import { useDragReorder } from '../../../hooks/useDragReorder'
-import { saveScreenToShowcase } from '../../../utils/saveScreenToCharacter'
+import { saveScreenToShowcase } from '../../../utils/saveScreenToShowcase'
 import { IntroductionInitializedModal } from '../../IntroductionInitializedModal'
 import { ScreenContentCard } from '../../ScreenContentCard'
 import { CreateOrEditScreenModal } from '../modals/CreateOrEditScreenModal'

@@ -7,7 +7,7 @@ import { useNavigate } from 'react-router-dom'
 
 import { adminBaseRoute, updateShowcase } from '../../../api/adminApi'
 import { useDragReorder } from '../../../hooks/useDragReorder'
-import { saveScreenToShowcase } from '../../../utils/saveScreenToCharacter'
+import { saveScreenToShowcase } from '../../../utils/saveScreenToShowcase'
 import { ScreenContentCard } from '../../ScreenContentCard'
 import { CreateOrEditScreenModal } from '../modals/CreateOrEditScreenModal'
 import { CreateScenarioModal } from '../modals/CreateScenarioModal'
