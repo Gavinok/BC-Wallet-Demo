@@ -16,7 +16,7 @@ export function ShowcaseCard({ showcase: showcase, onClick }: ShowcaseCardProps)
           <div className="flex-1">
             <div className="flex items-center gap-2">
               <h3 className="text-bcgov-black font-semibold text-lg">{showcase.name as string}</h3>
-              {showcase.hidden && (
+              {showcase.status === 'hidden' && (
                 <span className="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">
                   Hidden
                 </span>

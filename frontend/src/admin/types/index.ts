@@ -69,9 +69,11 @@ export interface Persona {
   image?: string
 }
 
+export type ShowcaseStatus = 'active' | 'hidden' | 'pending'
+
 export interface Showcase {
   name: string
-  hidden?: boolean
+  status?: ShowcaseStatus
   description?: string
   persona?: Persona
   progressBar: ProgressBarStep[]
