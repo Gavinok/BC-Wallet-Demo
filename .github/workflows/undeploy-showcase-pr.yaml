@@ -1,6 +1,6 @@
 # Remove Helm release and chart-scoped secrets/PVC when a PR is closed (traction-style cleanup).
 #
-# Requires bcgov repo + OPENSHIFT_SERVER, OPENSHIFT_TOKEN, OPENSHIFT_NAMESPACE (same as deploy-showcase-pr).
+# Requires bcgov repo + OPENSHIFT_SERVER, OPENSHIFT_TOKEN, OPENSHIFT_DEV_NAMESPACE (same as deploy-showcase-pr).
 
 name: Showcase PR — uninstall
 
@@ -20,37 +20,98 @@ on:
 
 permissions:
   contents: read
+  # Delete GHCR package versions tagged pr-<N> after uninstall (same token scope as PR image push).
+  packages: write
 
 jobs:
   uninstall:
     name: Helm uninstall PR instance
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ github.repository_owner == 'bcgov' && secrets.OPENSHIFT_TOKEN != '' && secrets.OPENSHIFT_SERVER != '' && secrets.OPENSHIFT_NAMESPACE != '' }}
+    # Job-level `if` cannot use `secrets`. Skip uninstall steps when secrets are unset (notice only).
+    if: github.repository_owner == 'bcgov'
     steps:
       - uses: actions/checkout@v4
 
-      - uses: azure/setup-helm@v4
-        with:
-          version: v3.16.3
+      - id: openshift
+        name: Preflight OpenShift secrets
+        env:
+          OPENSHIFT_TOKEN: ${{ secrets.OPENSHIFT_TOKEN }}
+          OPENSHIFT_SERVER: ${{ secrets.OPENSHIFT_SERVER }}
+          OPENSHIFT_DEV_NAMESPACE: ${{ secrets.OPENSHIFT_DEV_NAMESPACE }}
+        run: |
+          if [[ -z "${OPENSHIFT_TOKEN}" || -z "${OPENSHIFT_SERVER}" || -z "${OPENSHIFT_DEV_NAMESPACE}" ]]; then
+            echo '::notice::Skipping uninstall: OpenShift secrets are not configured.'
+            echo "continue=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "continue=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: ./.github/actions/showcase-setup-oc-helm
+        if: steps.openshift.outputs.continue == 'true'
 
       - uses: redhat-actions/oc-login@v1
+        if: steps.openshift.outputs.continue == 'true'
         with:
           openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
-          namespace: ${{ secrets.OPENSHIFT_NAMESPACE }}
+          namespace: ${{ secrets.OPENSHIFT_DEV_NAMESPACE }}
+
+      - name: Helm release storage RBAC (uninstall)
+        if: steps.openshift.outputs.continue == 'true'
+        id: helm_rbac
+        env:
+          OPENSHIFT_DEV_NAMESPACE: ${{ secrets.OPENSHIFT_DEV_NAMESPACE }}
+        run: |
+          set -euo pipefail
+          ns="${OPENSHIFT_DEV_NAMESPACE}"
+          if [[ -z "${ns}" ]]; then
+            echo 'can_helm=false' >> "${GITHUB_OUTPUT}"
+            echo '::warning::OPENSHIFT_DEV_NAMESPACE empty; skipping helm uninstall.'
+            exit 0
+          fi
+          if oc auth can-i list secrets -n "${ns}" --quiet >/dev/null 2>&1; then
+            echo "can_helm=true" >> "${GITHUB_OUTPUT}"
+          elif oc auth can-i list configmaps -n "${ns}" --quiet >/dev/null 2>&1; then
+            echo "HELM_DRIVER=configmap" >> "${GITHUB_ENV}"
+            echo "can_helm=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "can_helm=false" >> "${GITHUB_OUTPUT}"
+            echo '::warning::Skipping helm uninstall: token cannot list secrets or configmaps in '"${ns}"' (Helm 3 release storage). Workloads may still be removed by the next step; ask platform to extend CI RBAC or delete Helm metadata manually.'
+          fi
 
       - name: Helm uninstall
+        if: steps.openshift.outputs.continue == 'true' && steps.helm_rbac.outputs.can_helm == 'true'
         continue-on-error: true
         env:
           PR_NUM: ${{ github.event.pull_request.number }}
-        run: helm uninstall "pr-${PR_NUM}-showcase"
+          OPENSHIFT_DEV_NAMESPACE: ${{ secrets.OPENSHIFT_DEV_NAMESPACE }}
+        run: helm uninstall "pr-${PR_NUM}-showcase" --namespace "${OPENSHIFT_DEV_NAMESPACE}"
 
       - name: Delete leftover secrets and PVCs for this release
+        if: steps.openshift.outputs.continue == 'true'
         continue-on-error: true
         env:
           PR_NUM: ${{ github.event.pull_request.number }}
+          OPENSHIFT_DEV_NAMESPACE: ${{ secrets.OPENSHIFT_DEV_NAMESPACE }}
         run: >
           oc delete secret,pvc
+          -n "${OPENSHIFT_DEV_NAMESPACE}"
           -l "app.kubernetes.io/instance=pr-${PR_NUM}-showcase"
           --ignore-not-found=true
+
+      # GHCR cleanup: deploy-showcase-pr pushes server/frontend tags pr-<N>. Prune those versions on PR close.
+      # Uses snok/container-retention-policy (see https://github.com/snok/container-retention-policy).
+      # GITHUB_TOKEN requires exact image-names and image-tags (no wildcards). cut-off is required by the action;
+      # use a minimal window so PR-tagged images are eligible as soon as the PR is closed.
+      - name: Delete GHCR images tagged pr-${{ github.event.pull_request.number }}
+        if: always()
+        continue-on-error: true
+        uses: snok/container-retention-policy@v3.0.1
+        with:
+          account: ${{ github.repository_owner }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          image-names: bc-wallet-showcase-server bc-wallet-showcase-frontend
+          image-tags: pr-${{ github.event.pull_request.number }}
+          cut-off: 1s
+          tag-selection: tagged
