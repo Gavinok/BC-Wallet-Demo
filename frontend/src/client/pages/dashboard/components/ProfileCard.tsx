@@ -28,7 +28,7 @@ export const ProfileCard: React.FC<Props> = ({ currentShowcase }) => {
         schema: 'iglu:ca.bc.gov.digital/action/jsonschema/1-0-0',
         data: {
           action: 'leave',
-          path: currentShowcase.persona.type,
+          path: currentShowcase.persona?.type,
           step: 'dashboard',
         },
       },
@@ -46,11 +46,11 @@ export const ProfileCard: React.FC<Props> = ({ currentShowcase }) => {
         <motion.img
           whileHover={{ scale: 1.05 }}
           className="m-auto h-32 w-32 md:h-36 md:w-36 p-4 rounded-full bg-bcgov-white dark:bg-bcgov-black ring-2 ring-white mb-4 shadow"
-          src={prependApiUrl(currentShowcase.persona.image)}
-          alt={currentShowcase.persona.name}
+          src={prependApiUrl(currentShowcase.persona?.image || '')}
+          alt={currentShowcase.persona?.name}
         />
 
-        <h1 className="font-bold text-lg flex flex-1 justify-center mb-4">{currentShowcase.persona.name}</h1>
+        <h1 className="font-bold text-lg flex flex-1 justify-center mb-4">{currentShowcase.persona?.name}</h1>
         <p className="text-sm xl:text-base">
           {currentShowcase.description ??
             currentShowcase?.introduction.find((screen) => screen.screenId === 'PICK_CHARACTER')?.text}
