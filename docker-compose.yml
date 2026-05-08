@@ -1,8 +1,7 @@
-# Do not start every service at once: `dev` and `frontend`+`backend` both use ports 3000 and 5000.
-# Typical stacks:
-#   docker compose up --build mongodb backend frontend
-#   docker compose up --build mongodb dev
-# Optional MongoDB web UI: docker compose --profile mongo-ui up … (see mongo-express service)
+# Two mutually exclusive stacks — do NOT run both at once (ports 3000 and 5000 conflict):
+#   Dev (hot-reload, Keycloak included):  docker compose --profile dev up --build
+#   Production-like (pre-built images):   docker compose --profile prod up --build
+# Optional MongoDB web UI: add --profile mongo-ui to either command (see mongo-express service)
 services:
   mongodb:
     image: mongo:8
@@ -38,6 +37,8 @@ services:
 
   frontend:
     image: bc-wallet-demo-web
+    profiles:
+      - prod
     build:
       context: ./
       dockerfile: ./frontend/Dockerfile
@@ -53,6 +54,8 @@ services:
       - ./frontend/.env
   backend:
     image: bc-wallet-demo-server
+    profiles:
+      - prod
     build:
       context: ./
       dockerfile: ./server/Dockerfile
@@ -80,11 +83,24 @@ services:
       - '5000:5000'
     volumes:
       - ./:/app
+      # Preserve node_modules installed in the image — the bind mount above would
+      # otherwise shadow /app/node_modules with whatever is (or isn't) on the host.
+      - dev-node-modules:/app/node_modules
+    env_file:
+      # Copy server/.env.example → server/.env before running.
+      # `required: false` lets the stack start even without the file (useful in CI).
+      - path: ./server/.env
+        required: false
     environment:
+      # These always override anything in server/.env so MongoDB stays on the Compose network.
       MONGODB_HOST: mongodb
       MONGODB_PORT: '27017'
       MONGODB_DB_NAME: bc_wallet_showcase
       MONGODB_URI: mongodb://mongodb:27017/bc_wallet_showcase
+      # Server-side JWKS fetch must use the Docker service name, not localhost.
+      # The issuer in config/keycloak.json stays as localhost:8080 to match
+      # the URL the browser used when logging in.
+      KEYCLOAK_INTERNAL_URL: http://keycloak:8080
     depends_on:
       mongodb:
         condition: service_healthy
@@ -108,6 +124,10 @@ services:
       KC_BOOTSTRAP_ADMIN_USERNAME: admin
       KC_BOOTSTRAP_ADMIN_PASSWORD: admin
       KC_HTTP_ENABLED: true
+      # Disable HTTPS enforcement for local dev. With start-dev + HOSTNAME_STRICT=false
+      # Keycloak derives its URL from the request Host header (localhost:8080), so
+      # the OIDC issuer matches what the browser uses and token validation succeeds.
+      KC_HOSTNAME_STRICT: 'false'
     depends_on:
       keycloak-db:
         condition: service_healthy
@@ -131,3 +151,4 @@ services:
 volumes:
   mongo-data:
   keycloak-db-data:
+  dev-node-modules:
