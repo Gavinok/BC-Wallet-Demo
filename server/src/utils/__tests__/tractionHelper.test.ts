@@ -214,7 +214,7 @@ describe('tractionGarbageCollection', () => {
       .mockResolvedValueOnce({ data: { results: [] } })
       .mockResolvedValueOnce({
         data: {
-          results: [{ credential_exchange_id: 'cred-exch-1', created_at: staleDate }],
+          results: [{ cred_ex_id: 'cred-exch-1', created_at: staleDate }],
         },
       })
       .mockResolvedValueOnce({ data: { results: [] } })
@@ -224,7 +224,7 @@ describe('tractionGarbageCollection', () => {
     for (let i = 0; i < 10; i++) await Promise.resolve()
 
     expect(axios.delete).toHaveBeenCalledWith(
-      'https://traction.example.com/issue-credential/records/cred-exch-1',
+      'https://traction.example.com/issue-credential-2.0/records/cred-exch-1',
       expect.anything(),
     )
   })
