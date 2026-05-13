@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom'
 import { adminBaseRoute, getAllShowcases } from '../../api/adminApi'
 
 import { ShowcaseCard } from './ShowcaseCard'
-import { CreateShowcaseModal } from './modals/CreateShowcaseModal'
+import { CreateOrEditShowcaseModal } from './modals/CreateOrEditShowcaseModal'
 
 export function ShowcasesPanel() {
   const auth = useAuth()
@@ -18,19 +18,20 @@ export function ShowcasesPanel() {
   const [error, setError] = useState<string | null>(null)
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
-  useEffect(() => {
-    const fetchShowcases = async () => {
-      try {
-        setLoading(true)
-        const showcases = await getAllShowcases(auth)
-        setShowcases(showcases)
-        setError(null)
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch showcases')
-      } finally {
-        setLoading(false)
-      }
+  const fetchShowcases = async () => {
+    try {
+      setLoading(true)
+      const showcases = await getAllShowcases(auth)
+      setShowcases(showcases)
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch showcases')
+    } finally {
+      setLoading(false)
     }
+  }
+
+  useEffect(() => {
     void fetchShowcases()
   }, [auth.user?.access_token])
 
@@ -54,21 +55,23 @@ export function ShowcasesPanel() {
 
       {!loading && !error && showcases.length > 0 && (
         <div className="space-y-4">
-          {showcases.map((showcase, idx) => (
+          {showcases.map((showcase) => (
             <ShowcaseCard
-              key={idx}
+              key={showcase.name}
               showcase={showcase}
               onClick={() => navigate(`${adminBaseRoute}/creator/showcase/${showcase.name}`, { state: { showcase } })}
+              onRefresh={fetchShowcases}
             />
           ))}
         </div>
       )}
 
-      <CreateShowcaseModal
+      <CreateOrEditShowcaseModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={(showcaseName) => {
           setIsCreateModalOpen(false)
+          void fetchShowcases()
           navigate(`${adminBaseRoute}/creator/showcase/${showcaseName}`, { state: { isNewShowcase: true } })
         }}
       />
